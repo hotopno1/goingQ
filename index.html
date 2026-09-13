@@ -2,99 +2,543 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>질문왕 챌린지 : 에코리움을 정복하라!</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- 가독성과 친근함을 주는 깔끔한 웹폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Noto Sans KR', sans-serif; background: #f5f9f5; color: #1a2e1a; min-height: 100vh; padding-bottom: 90px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 50%, #fdf4ff 100%);
+      background-attachment: fixed;
+      color: #1f2937;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
 
     /* ── 헤더 ── */
-    #app-header { background: #2e7d32; color: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
-    #app-header .htitle { font-size: 15px; font-weight: 700; }
-    #app-header .hsub   { font-size: 10px; opacity: 0.8; margin-top: 1px; }
-    #app-header .huser  { text-align: right; }
-    #app-header .hgrade { display: block; font-size: 11px; opacity: 0.8; }
-    #app-header .hname  { display: block; font-size: 13px; font-weight: 700; }
+    #app-header {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: #fff;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      box-shadow: 0 4px 16px rgba(5, 150, 105, 0.25);
+    }
+    #app-header .htitle {
+      font-family: 'Jua', sans-serif;
+      font-size: 17px;
+      letter-spacing: 0.3px;
+    }
+    #app-header .hsub {
+      font-size: 11px;
+      opacity: 0.9;
+      color: #d1fae5;
+      margin-top: 1px;
+    }
+    #app-header .huser {
+      text-align: right;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    #app-header .hgrade {
+      display: block;
+      font-size: 10px;
+      color: #e6fffa;
+      font-weight: 600;
+    }
+    #app-header .hname {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+    }
 
-    /* ── 관 탭 ── */
-    #hall-tab-bar { display: none; overflow-x: auto; background: #fff; border-bottom: 1.5px solid #e0ece0; scrollbar-width: none; padding: 0 4px; }
+    /* ── 관 탭 바 ── */
+    #hall-tab-bar {
+      display: none;
+      overflow-x: auto;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid #e5e7eb;
+      scrollbar-width: none;
+      padding: 8px 10px;
+      gap: 6px;
+      position: sticky;
+      top: 61px;
+      z-index: 25;
+    }
     #hall-tab-bar::-webkit-scrollbar { display: none; }
-    .hall-tab { flex-shrink: 0; padding: 10px 14px; font-size: 13px; border: none; border-bottom: 2.5px solid transparent; background: none; cursor: pointer; white-space: nowrap; transition: all 0.15s; color: #888; font-family: inherit; font-weight: 400; }
-    .hall-tab.active { font-weight: 700; }
-    .hall-tab .tab-check { font-size: 10px; color: #2e7d32; }
+    .hall-tab {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      font-size: 13px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 20px;
+      background: #fff;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      color: #6b7280;
+      font-family: 'Jua', sans-serif;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .hall-tab:active { transform: scale(0.95); }
+    .hall-tab.active {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .hall-tab .tab-check {
+      font-size: 12px;
+      font-weight: 800;
+      color: #10b981;
+    }
 
-    /* ── 진행 스텝 표시 ── */
-    #step-bar { background: #fff; border-bottom: 1px solid #e0ece0; padding: 10px 16px; display: none; }
-    #step-label { font-size: 13px; font-weight: 700; color: #2e7d32; margin-bottom: 6px; }
-    #step-track { height: 6px; background: #e0ece0; border-radius: 3px; overflow: hidden; }
-    #step-fill  { height: 100%; background: #2e7d32; border-radius: 3px; transition: width 0.4s; }
+    /* ── 진행 스텝 표시 (EXP 게이지 스타일) ── */
+    #step-bar {
+      background: #ffffff;
+      padding: 12px 18px;
+      display: none;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .step-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    #step-label {
+      font-family: 'Jua', sans-serif;
+      font-size: 14px;
+      color: #059669;
+    }
+    #step-track {
+      height: 10px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+    }
+    #step-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #06b6d4);
+      border-radius: 10px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    #step-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.2) 100%);
+      animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
 
     /* ── 콘텐츠 ── */
-    .content { max-width: 480px; margin: 0 auto; padding: 20px 16px 0; }
+    .content {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 18px 16px 0;
+    }
+
+    /* ── 질문 메인 카드 ── */
+    .card-box {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 22px;
+      padding: 22px 20px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.07);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      margin-bottom: 20px;
+    }
 
     /* ── 관 뱃지 (상단) ── */
-    .hall-badge-top { display: inline-flex; align-items: center; gap: 8px; border-radius: 24px; padding: 8px 18px; font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .hall-badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 24px;
+      padding: 6px 14px;
+      font-size: 15px;
+      font-family: 'Jua', sans-serif;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 12px;
+    }
 
-    /* ── 질문 유형 타이틀 ── */
-    .q-type-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-    .q-type-desc  { font-size: 14px; color: #666; margin-bottom: 20px; line-height: 1.5; }
+    /* ── 질문 유형 뱃지 ── */
+    .q-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 12px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .q-type-desc {
+      font-size: 14px;
+      color: #4b5563;
+      margin-bottom: 18px;
+      line-height: 1.55;
+      font-weight: 500;
+    }
 
-    /* ── 예시 박스 ── */
-    .ex-box { border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
-    .ex-label { font-size: 11px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .ex-q { font-size: 14px; font-weight: 600; margin-bottom: 4px; line-height: 1.5; }
-    .ex-a { font-size: 13px; line-height: 1.5; }
+    /* ── 예시 박스 (포스트잇 느낌) ── */
+    .ex-box {
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      border-left: 5px solid;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+    }
+    .ex-label {
+      font-family: 'Jua', sans-serif;
+      font-size: 12px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .ex-q {
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      line-height: 1.45;
+    }
+    .ex-a {
+      font-size: 13px;
+      line-height: 1.45;
+      opacity: 0.95;
+    }
 
     /* ── 입력 ── */
-    .input-label { display: block; font-size: 14px; font-weight: 700; color: #333; margin-bottom: 8px; }
-    textarea { width: 100%; min-height: 90px; padding: 14px; border-radius: 12px; border: 2px solid #c8e6c9; font-size: 15px; line-height: 1.7; resize: none; background: #fff; outline: none; font-family: inherit; transition: border-color 0.15s; }
-    textarea:focus { border-color: #2e7d32; }
-    .input-block { margin-bottom: 16px; }
+    .input-block { margin-bottom: 18px; }
+    .input-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 95px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 2px solid #e5e7eb;
+      font-size: 14.5px;
+      line-height: 1.6;
+      resize: none;
+      background: #fcfdfd;
+      outline: none;
+      font-family: inherit;
+      color: #1f2937;
+      transition: all 0.2s ease;
+    }
+    textarea:focus {
+      background: #fff;
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    }
+    textarea::placeholder {
+      color: #9ca3af;
+      font-size: 13.5px;
+    }
 
     /* ── 하단 네비 ── */
-    #nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #e0ece0; padding: 12px 16px; display: none; gap: 10px; z-index: 10; }
-    .nav-prev { flex: 1; padding: 14px; border-radius: 12px; border: 2px solid #c8e6c9; background: #fff; color: #2e7d32; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
-    .nav-prev:disabled { opacity: 0.3; cursor: not-allowed; }
-    .nav-next { flex: 2; padding: 14px; border-radius: 12px; border: none; background: #2e7d32; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; }
-    .nav-next:disabled { background: #a5d6a7; cursor: not-allowed; }
-    .nav-next.finish { background: #7b1fa2; }
+    #nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(0,0,0,0.07);
+      padding: 12px 16px;
+      display: none;
+      gap: 12px;
+      z-index: 20;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+    }
+    .nav-btn {
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-family: 'Jua', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      letter-spacing: 0.3px;
+    }
+    .nav-prev {
+      flex: 1;
+      border: 2px solid #d1d5db;
+      background: #fff;
+      color: #4b5563;
+      box-shadow: 0 3px 0 #d1d5db;
+    }
+    .nav-prev:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: none;
+    }
+    .nav-prev:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .nav-next {
+      flex: 2;
+      border: none;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      box-shadow: 0 4px 0 #047857, 0 6px 16px rgba(16, 185, 129, 0.35);
+    }
+    .nav-next:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 0 0 #047857;
+    }
+    .nav-next:disabled {
+      background: #9ca3af;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    .nav-next.finish {
+      background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+      box-shadow: 0 4px 0 #6b21a8, 0 6px 16px rgba(168, 85, 247, 0.35);
+    }
 
-    /* ── 로그인 ── */
-    .login-header { background: #1b5e20; padding: 44px 20px 34px; text-align: center; }
-    .login-emoji    { font-size: 52px; margin-bottom: 12px; }
-    .login-title    { font-size: 27px; font-weight: 700; color: #ffeb3b; margin-bottom: 6px; text-shadow: 0 2px 8px rgba(0,0,0,0.25); letter-spacing: -0.5px; }
-    .login-subtitle { font-size: 14px; color: rgba(255,255,255,0.85); }
-    .login-card     { max-width: 400px; margin: 0 auto; padding: 24px 20px; }
-    .info-box { background: #e8f5e9; border-radius: 12px; padding: 16px 18px; margin-bottom: 22px; border-left: 4px solid #2e7d32; }
-    .info-line { font-size: 14px; color: #1b5e20; line-height: 1.8; }
-    .field { margin-bottom: 16px; }
-    .field label { display: block; font-size: 14px; font-weight: 600; color: #444; margin-bottom: 7px; }
-    .field input { width: 100%; padding: 13px 15px; border-radius: 12px; border: 2px solid #c8e6c9; font-size: 16px; background: #f9fff9; outline: none; font-family: inherit; }
-    .field input:focus { border-color: #2e7d32; }
-    .id-hint   { font-size: 13px; margin-top: 6px; font-weight: 600; }
-    .login-btn { width: 100%; padding: 15px; background: #2e7d32; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 6px; font-family: inherit; }
-    .err-msg   { color: #c00; font-size: 13px; text-align: center; margin-top: 10px; }
+    /* ── 로그인 화면 ── */
+    .login-wrapper {
+      max-width: 420px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+    .login-banner {
+      background: linear-gradient(135deg, #059669 0%, #10b981 50%, #14b8a6 100%);
+      border-radius: 22px;
+      padding: 36px 20px 30px;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(5, 150, 105, 0.28);
+      margin-bottom: 20px;
+    }
+    .login-emoji {
+      font-size: 56px;
+      display: inline-block;
+      margin-bottom: 12px;
+      animation: floatEmoji 2s infinite ease-in-out;
+    }
+    @keyframes floatEmoji {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+    .login-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 29px;
+      color: #fef08a;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+    .login-subtitle {
+      font-size: 14px;
+      color: #d1fae5;
+    }
+    .login-card {
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 22px;
+      padding: 24px 22px;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12);
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+    }
+    .info-box {
+      background: #f0fdf4;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 22px;
+      border-left: 4px solid #10b981;
+    }
+    .info-line {
+      font-size: 13.5px;
+      color: #166534;
+      line-height: 1.7;
+    }
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 7px;
+    }
+    .field input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 2px solid #e5e7eb;
+      font-size: 15px;
+      background: #f9fafb;
+      outline: none;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .field input:focus {
+      background: #fff;
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    }
+    .id-hint {
+      font-size: 12.5px;
+      margin-top: 6px;
+      font-weight: 700;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 17px;
+      font-family: 'Jua', sans-serif;
+      cursor: pointer;
+      margin-top: 8px;
+      box-shadow: 0 4px 0 #047857, 0 8px 20px rgba(16, 185, 129, 0.35);
+      transition: all 0.15s;
+    }
+    .login-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 0 0 #047857;
+    }
+    .err-msg {
+      color: #ef4444;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      margin-top: 10px;
+    }
 
-    /* ── 완료 ── */
-    .done-wrap { max-width: 380px; margin: 50px auto; background: #fff; border-radius: 20px; padding: 40px 24px; text-align: center; box-shadow: 0 4px 24px rgba(46,125,50,0.13); }
-    .done-badge { font-size: 60px; margin-bottom: 14px; }
-    .done-title { font-size: 24px; font-weight: 700; color: #2e7d32; margin-bottom: 10px; }
-    .done-sub   { font-size: 15px; color: #555; line-height: 1.8; margin-bottom: 22px; }
-    .done-halls { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
-    .done-hall  { font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; }
+    /* ── 완료 화면 ── */
+    .done-wrap {
+      max-width: 400px;
+      margin: 40px auto 20px;
+      background: #fff;
+      border-radius: 26px;
+      padding: 38px 22px;
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(16, 185, 129, 0.16);
+      border: 3px solid #bbf7d0;
+    }
+    .done-badge {
+      font-size: 64px;
+      margin-bottom: 12px;
+      display: inline-block;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .done-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 26px;
+      color: #059669;
+      margin-bottom: 10px;
+    }
+    .done-sub {
+      font-size: 14.5px;
+      color: #4b5563;
+      line-height: 1.7;
+      margin-bottom: 22px;
+    }
+    .done-halls {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .done-hall {
+      font-family: 'Jua', sans-serif;
+      font-size: 12.5px;
+      padding: 7px 12px;
+      border-radius: 20px;
+    }
+
+    /* ── 완료 뱃지 (실시간) ── */
+    .step-done {
+      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+      color: #15803d;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      font-family: 'Jua', sans-serif;
+      font-size: 15px;
+      margin-top: 12px;
+      border: 1.5px solid #86efac;
+    }
+
+    /* ── 마무리 안내 ── */
+    .not-ready {
+      background: #fffbeb;
+      color: #b45309;
+      border: 1.5px solid #fde68a;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-align: center;
+      line-height: 1.55;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 17px;
+      font-family: 'Jua', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #5b21b6, 0 8px 24px rgba(109, 40, 217, 0.35);
+      transition: all 0.15s;
+    }
+    .submit-btn:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: none;
+    }
+    .submit-btn:disabled {
+      opacity: 0.45;
+      background: #9ca3af;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
 
     /* ── 화면 전환 ── */
     .screen { display: none; }
     .screen.active { display: block; }
-
-    /* ── 완료 뱃지 ── */
-    .step-done { background: #e8f5e9; color: #2e7d32; border-radius: 12px; padding: 14px; text-align: center; font-weight: 700; font-size: 15px; margin-top: 8px; }
-
-    /* ── 마무리 안내 ── */
-    .not-ready { background: #fff3e0; color: #bf6000; border-radius: 10px; padding: 12px 14px; font-size: 14px; margin-bottom: 14px; text-align: center; line-height: 1.5; }
-    .submit-btn { width: 100%; padding: 16px; background: #7b1fa2; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
-    .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -107,7 +551,7 @@
   </div>
   <div class="huser">
     <span class="hgrade" id="header-grade"></span>
-    <span class="hname"  id="header-name"></span>
+    <span class="hname" id="header-name"></span>
   </div>
 </header>
 
@@ -123,35 +567,40 @@
 
 <!-- 스텝 진행바 -->
 <div id="step-bar">
-  <div id="step-label">1 / 11</div>
+  <div class="step-header-row">
+    <div id="step-label">1 / 11</div>
+  </div>
   <div id="step-track"><div id="step-fill" style="width:0%"></div></div>
 </div>
 
 <!-- ===== 로그인 ===== -->
 <div id="login-screen" class="screen active">
-  <div class="login-header">
-    <div class="login-emoji">🌿</div>
-    <h1 class="login-title">질문왕 챌린지</h1>
-    <p class="login-subtitle">에코리움을 정복하라!</p>
-  </div>
-  <div class="login-card">
-    <div class="info-box">
-      <p class="info-line">🌿 에코리움을 관람하며 나만의 질문을 만들어보세요!</p>
-      <p class="info-line">각 관에서 <b>사실적 질문</b>과 <b>상상적 질문</b>을 하나씩 만들고, 직접 답을 찾아보는 활동입니다.</p>
+  <div class="login-wrapper">
+    <div class="login-banner">
+      <div class="login-emoji">🌿</div>
+      <h1 class="login-title">질문왕 챌린지</h1>
+      <p class="login-subtitle">에코리움을 정복하라!</p>
     </div>
-    <div class="field">
-      <label>학번</label>
-      <input type="text" id="input-id" placeholder="예) 2211  (학년·반·번호 4자리)" maxlength="4"
-        oninput="onIdInput()" onkeydown="if(event.key==='Enter')handleLogin()">
-      <p class="id-hint" id="id-hint" style="color:#aaa"></p>
+    
+    <div class="login-card">
+      <div class="info-box">
+        <p class="info-line">🌿 에코리움을 관람하며 나만의 질문을 만들어보세요!</p>
+        <p class="info-line">각 관에서 <b>사실적 질문</b>과 <b>상상적 질문</b>을 하나씩 만들고, 직접 답을 찾아보는 활동입니다.</p>
+      </div>
+      <div class="field">
+        <label>학번</label>
+        <input type="text" id="input-id" placeholder="예) 2211  (학년·반·번호 4자리)" maxlength="4"
+          oninput="onIdInput()" onkeydown="if(event.key==='Enter')handleLogin()">
+        <p class="id-hint" id="id-hint" style="color:#aaa"></p>
+      </div>
+      <div class="field">
+        <label>이름</label>
+        <input type="text" id="input-name" placeholder="예) 홍길동"
+          onkeydown="if(event.key==='Enter')handleLogin()">
+      </div>
+      <p class="err-msg" id="login-error" style="display:none"></p>
+      <button class="login-btn" onclick="handleLogin()">미션 시작하기 🌿</button>
     </div>
-    <div class="field">
-      <label>이름</label>
-      <input type="text" id="input-name" placeholder="예) 홍길동"
-        onkeydown="if(event.key==='Enter')handleLogin()">
-    </div>
-    <p class="err-msg" id="login-error" style="display:none"></p>
-    <button class="login-btn" onclick="handleLogin()">미션 시작하기 🌿</button>
   </div>
 </div>
 
@@ -167,394 +616,8 @@
     <h2 class="done-title">질문왕 달성!</h2>
     <p class="done-sub" id="done-msg"></p>
     <div class="done-halls">
-      <span class="done-hall" style="background:#e8f5e9;color:#2e7d32;border:1px solid #66bb6a">🌴 열대관 ✓</span>
-      <span class="done-hall" style="background:#fff3e0;color:#e65100;border:1px solid #ffa726">🏜️ 사막관 ✓</span>
-      <span class="done-hall" style="background:#e3f2fd;color:#1565c0;border:1px solid #42a5f5">🌿 지중해관 ✓</span>
-      <span class="done-hall" style="background:#f1f8e9;color:#558b2f;border:1px solid #9ccc65">🍂 온대관 ✓</span>
-      <span class="done-hall" style="background:#e1f5fe;color:#0277bd;border:1px solid #4fc3f7">🧊 극지관 ✓</span>
-    </div>
-    <p style="font-size:12px;color:#aaa;margin-top:16px">선생님이 구글 시트에서 확인하실 수 있습니다</p>
-  </div>
-</div>
-
-<!-- 하단 네비 -->
-<div id="nav-bar" style="display:none">
-  <button class="nav-prev" id="btn-prev" onclick="goStep(currentStep-1)" disabled>← 이전</button>
-  <button class="nav-next" id="btn-next" onclick="goStep(currentStep+1)">다음 →</button>
-</div>
-
-<script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxaVfiZaVLaIQYgwp3AOG1uimu4hRKemGLNSfN4aMSH6aPXIgpYFEiwX7oRhq26FzWk/exec";
-
-const HALLS = [
-  { id:"tropical",      name:"열대관",   emoji:"🌴", color:"#2e7d32", bg:"#e8f5e9", factBg:"#fff8e1", factBorder:"#ffd54f", factColor:"#e65100", imagBg:"#fce4ec", imagBorder:"#f48fb1", imagColor:"#880e4f",
-    factExample:  { q:"열대관에서 만날 수 있는 '세계 최대 담수어'의 이름은 무엇인가?", a:"피라루쿠" },
-    imaginExample:{ q:"만약 열대우림이 사라지면 어떤 문제가 생길까?", a:"지구 온난화 문제가 가속화될 것이다." } },
-  { id:"desert",        name:"사막관",   emoji:"🏜️", color:"#e65100", bg:"#fff3e0", factBg:"#fff8e1", factBorder:"#ffd54f", factColor:"#e65100", imagBg:"#fce4ec", imagBorder:"#f48fb1", imagColor:"#880e4f",
-    factExample:  { q:"사막관에서 볼 수 있는 파충류는 몇 종인가?", a:"6종" },
-    imaginExample:{ q:"만약 내가 사막에서 살아야 한다면 어떤 능력이 가장 필요할까?", a:"선인장처럼 몸에 물을 저장하는 능력이 필요할 것이다." } },
-  { id:"mediterranean", name:"지중해관", emoji:"🌿", color:"#1565c0", bg:"#e3f2fd", factBg:"#fff8e1", factBorder:"#ffd54f", factColor:"#e65100", imagBg:"#fce4ec", imagBorder:"#f48fb1", imagColor:"#880e4f",
-    factExample:  { q:"지중해관에서 만날 수 있는 양서·파충류는 몇 종인가?", a:"7종" },
-    imaginExample:{ q:"왜 지중해 지역은 전 세계 식물종의 25%나 차지할 수 있을까?", a:"여름에 건조하고 겨울에 따뜻한 기후가 다양한 식물이 살기에 좋은 환경이기 때문이다." } },
-  { id:"temperate",     name:"온대관",   emoji:"🍂", color:"#558b2f", bg:"#f1f8e9", factBg:"#fff8e1", factBorder:"#ffd54f", factColor:"#e65100", imagBg:"#fce4ec", imagBorder:"#f48fb1", imagColor:"#880e4f",
-    factExample:  { q:"온대관에서 볼 수 있는 어류는 몇 종인가?", a:"40여 종" },
-    imaginExample:{ q:"만약 한반도에서 사계절이 사라진다면 온대관의 생물들은 어떻게 될까?", a:"계절에 맞춰 적응한 동식물들이 번식과 먹이 활동에 혼란이 생길 것이다." } },
-  { id:"polar",         name:"극지관",   emoji:"🧊", color:"#0277bd", bg:"#e1f5fe", factBg:"#fff8e1", factBorder:"#ffd54f", factColor:"#e65100", imagBg:"#fce4ec", imagBorder:"#f48fb1", imagColor:"#880e4f",
-    factExample:  { q:"극지관은 어떤 구역으로 구성되어 있나? (4가지)", a:"개마고원 / 타이가와 툰드라 / 북극 / 남극" },
-    imaginExample:{ q:"왜 극지방의 얼음이 녹으면 우리나라에도 영향을 미칠까?", a:"해수면이 상승하고 기후가 변해 우리나라의 날씨와 생태계도 달라질 것이다." } },
-];
-
-// 스텝 구조: 0~9 = 관별 (짝수=사실, 홀수=상상), 10 = 마무리
-// step 0 = 열대 사실, 1 = 열대 상상, 2 = 사막 사실 ... 9 = 극지 상상, 10 = 마무리
-const TOTAL_STEPS = 11;
-
-let studentId = "", studentName = "", parsedId = null;
-let currentStep = 0;
-let answers = {};
-let bestQ = "", bestReason = "", reflection = "";
-
-function parseStudentId(id) {
-  const s = id.trim();
-  if (!/^\d{4}$/.test(s)) return null;
-  return { grade:s[0], cls:s[1], num:s.slice(2), label:`${s[0]}학년 ${s[1]}반 ${s.slice(2)}번` };
-}
-
-function onIdInput() {
-  const val = document.getElementById('input-id').value;
-  const hint = document.getElementById('id-hint');
-  const p = parseStudentId(val);
-  if (!val) { hint.textContent=''; return; }
-  if (!p)   { hint.textContent='숫자 4자리로 입력해주세요'; hint.style.color='#c00'; return; }
-  hint.textContent = `✓ ${p.label}`;
-  hint.style.color = '#2e7d32';
-}
-
-function handleLogin() {
-  const idVal   = document.getElementById('input-id').value.trim();
-  const nameVal = document.getElementById('input-name').value.trim();
-  const errEl   = document.getElementById('login-error');
-  const showErr = msg => { errEl.textContent=msg; errEl.style.display='block'; };
-
-  if (!idVal)              { showErr('학번을 입력해주세요.'); return; }
-  const p = parseStudentId(idVal);
-  if (!p)                  { showErr('숫자 4자리로 입력해주세요. (예: 2211)'); return; }
-  if (!nameVal)            { showErr('이름을 입력해주세요.'); return; }
-
-  errEl.style.display = 'none';
-  studentId = idVal; studentName = nameVal; parsedId = p;
-  document.getElementById('header-grade').textContent = `${p.grade}학년 ${p.cls}반`;
-  document.getElementById('header-name').textContent  = studentName;
-  showMission();
-}
-
-function showMission() {
-  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
-  document.getElementById('mission-screen').classList.add('active');
-  document.getElementById('app-header').style.display    = 'flex';
-  document.getElementById('hall-tab-bar').style.display  = 'flex';
-  document.getElementById('step-bar').style.display      = 'block';
-  document.getElementById('nav-bar').style.display       = 'flex';
-  currentStep = 0;
-  renderStep(0);
-}
-
-// 관 탭 클릭 → 해당 관의 첫 스텝(사실적)으로 이동
-function goHall(hallIdx) {
-  saveStep();
-  currentStep = hallIdx < 5 ? hallIdx * 2 : 10;
-  renderStep(currentStep);
-  window.scrollTo(0,0);
-}
-
-function updateHallTabs() {
-  const hallIdx = currentStep < 10 ? Math.floor(currentStep / 2) : 5;
-  const TAB_COLORS = ["#2e7d32","#e65100","#1565c0","#558b2f","#0277bd","#7b1fa2"];
-  document.querySelectorAll('.hall-tab').forEach((btn, i) => {
-    const color = TAB_COLORS[i];
-    const active = i === hallIdx;
-    btn.style.color = active ? color : '#888';
-    btn.style.borderBottomColor = active ? color : 'transparent';
-    btn.style.fontWeight = active ? '700' : '400';
-    // 완료 체크
-    let check = btn.querySelector('.tab-check');
-    if (!check) { check = document.createElement('span'); check.className = 'tab-check'; btn.appendChild(check); }
-    const done = i < 5
-      ? (answers[HALLS[i].id+'_factQ']||'').trim() && (answers[HALLS[i].id+'_factA']||'').trim() &&
-        (answers[HALLS[i].id+'_imaginQ']||'').trim() && (answers[HALLS[i].id+'_imaginA']||'').trim()
-      : bestQ.trim() && bestReason.trim() && reflection.trim();
-    check.textContent = done ? ' ✓' : '';
-  });
-}
-
-
-function stepInfo(step) {
-  if (step >= 10) return { type:'finish', hallIdx:-1 };
-  return { type: step%2===0 ? 'fact' : 'imagin', hallIdx: Math.floor(step/2) };
-}
-
-function saveStep() {
-  const { type, hallIdx } = stepInfo(currentStep);
-  if (type === 'fact') {
-    const h = HALLS[hallIdx];
-    answers[h.id+'_factQ'] = document.getElementById('ta-q')?.value || answers[h.id+'_factQ'] || '';
-    answers[h.id+'_factA'] = document.getElementById('ta-a')?.value || answers[h.id+'_factA'] || '';
-  } else if (type === 'imagin') {
-    const h = HALLS[hallIdx];
-    answers[h.id+'_imaginQ'] = document.getElementById('ta-q')?.value || answers[h.id+'_imaginQ'] || '';
-    answers[h.id+'_imaginA'] = document.getElementById('ta-a')?.value || answers[h.id+'_imaginA'] || '';
-  } else {
-    bestQ      = document.getElementById('ta-bestQ')?.value      || bestQ;
-    bestReason = document.getElementById('ta-bestReason')?.value || bestReason;
-    reflection = document.getElementById('ta-reflection')?.value || reflection;
-  }
-}
-
-function goStep(idx) {
-  if (idx < 0 || idx >= TOTAL_STEPS) return;
-  saveStep();
-  currentStep = idx;
-  renderStep(idx);
-  window.scrollTo(0,0);
-}
-
-function stepFilled(step) {
-  const { type, hallIdx } = stepInfo(step);
-  if (type === 'fact') {
-    const h = HALLS[hallIdx];
-    return (answers[h.id+'_factQ']||'').trim() && (answers[h.id+'_factA']||'').trim();
-  } else if (type === 'imagin') {
-    const h = HALLS[hallIdx];
-    return (answers[h.id+'_imaginQ']||'').trim() && (answers[h.id+'_imaginA']||'').trim();
-  }
-  return bestQ.trim() && bestReason.trim() && reflection.trim();
-}
-
-function allHallsFilled() {
-  return HALLS.every(h =>
-    (answers[h.id+'_factQ']||'').trim() && (answers[h.id+'_factA']||'').trim() &&
-    (answers[h.id+'_imaginQ']||'').trim() && (answers[h.id+'_imaginA']||'').trim()
-  );
-}
-
-function isFinishReady() {
-  return allHallsFilled() && bestQ.trim() && bestReason.trim() && reflection.trim();
-}
-
-function updateNav() {
-  const prevBtn = document.getElementById('btn-prev');
-  const nextBtn = document.getElementById('btn-next');
-  prevBtn.disabled = currentStep === 0;
-
-  if (currentStep === TOTAL_STEPS - 1) {
-    // 마무리 스텝: 제출 버튼은 콘텐츠 안에 별도 존재 → next 숨김
-    nextBtn.style.display = 'none';
-  } else {
-    nextBtn.style.display = 'block';
-    nextBtn.classList.remove('finish');
-    const { type, hallIdx } = stepInfo(currentStep);
-    // 마지막 관 상상 다음은 마무리
-    if (currentStep === TOTAL_STEPS - 2) {
-      nextBtn.textContent = '마무리 →';
-    } else {
-      nextBtn.textContent = '다음 →';
-    }
-  }
-}
-
-function updateStepBar() {
-  const pct = (currentStep / (TOTAL_STEPS-1)) * 100;
-  document.getElementById('step-fill').style.width = pct + '%';
-  const { type, hallIdx } = stepInfo(currentStep);
-  let label = '';
-  if (type === 'finish') {
-    label = '마무리 미션';
-  } else {
-    const h = HALLS[hallIdx];
-    label = `${h.emoji} ${h.name} — ${type==='fact' ? '♧ 사실적 질문' : '♣ 상상적 질문'}`;
-  }
-  document.getElementById('step-label').textContent = `${currentStep+1} / ${TOTAL_STEPS}  ${label}`;
-}
-
-function liveCheck() {
-  const { type, hallIdx } = stepInfo(currentStep);
-  const q = document.getElementById('ta-q')?.value || '';
-  const a = document.getElementById('ta-a')?.value || '';
-  const filled = q.trim() && a.trim();
-  const badge = document.getElementById('step-done');
-  if (badge) badge.style.display = filled ? 'block' : 'none';
-
-  if (type === 'fact') {
-    const h = HALLS[hallIdx];
-    answers[h.id+'_factQ'] = q;
-    answers[h.id+'_factA'] = a;
-  } else if (type === 'imagin') {
-    const h = HALLS[hallIdx];
-    answers[h.id+'_imaginQ'] = q;
-    answers[h.id+'_imaginA'] = a;
-  }
-}
-
-function liveCheckFinish() {
-  bestQ      = document.getElementById('ta-bestQ')?.value      || '';
-  bestReason = document.getElementById('ta-bestReason')?.value || '';
-  reflection = document.getElementById('ta-reflection')?.value || '';
-  const btn = document.getElementById('submit-btn');
-  const box = document.getElementById('not-ready-box');
-  const ready = isFinishReady();
-  if (btn) btn.disabled = !ready;
-  if (box) box.style.display = ready ? 'none' : 'block';
-}
-
-function renderStep(step) {
-  updateStepBar();
-  updateNav();
-  updateHallTabs();
-  const content = document.getElementById('step-content');
-  const { type, hallIdx } = stepInfo(step);
-
-  if (type === 'finish') {
-    const ready = isFinishReady();
-    const filledCnt = HALLS.filter(h =>
-      (answers[h.id+'_factQ']||'').trim() && (answers[h.id+'_factA']||'').trim() &&
-      (answers[h.id+'_imaginQ']||'').trim() && (answers[h.id+'_imaginA']||'').trim()
-    ).length;
-
-    content.innerHTML = `
-      <div style="display:inline-flex;align-items:center;gap:8px;background:#f3e5f5;border-radius:24px;padding:8px 18px;margin-bottom:6px">
-        <span style="font-size:22px">🏆</span>
-        <span style="font-size:17px;font-weight:700;color:#7b1fa2">마무리 미션</span>
-      </div>
-
-      <div style="margin-bottom:20px">
-        <div style="font-size:20px;font-weight:700;color:#7b1fa2;margin-bottom:6px">오늘의 베스트 질문!</div>
-        <div style="font-size:14px;color:#666;line-height:1.5">5개 관에서 만든 질문 중 가장 마음에 드는 질문을 골라보세요.</div>
-      </div>
-
-      ${!allHallsFilled() ? `<div id="not-ready-box" class="not-ready">아직 ${5-filledCnt}개 관이 남았어요.<br>이전 버튼으로 돌아가서 완성해주세요!</div>` : ''}
-      ${allHallsFilled() ? `
-        <div class="input-block">
-          <label class="input-label">🥇 베스트 질문</label>
-          <textarea id="ta-bestQ" placeholder="가장 마음에 드는 질문을 적어보세요." oninput="liveCheckFinish()">${escHtml(bestQ)}</textarea>
-        </div>
-        <div class="input-block">
-          <label class="input-label">이 질문을 고른 이유</label>
-          <textarea id="ta-bestReason" placeholder="왜 이 질문이 가장 좋았나요?" oninput="liveCheckFinish()">${escHtml(bestReason)}</textarea>
-        </div>
-        <div style="margin-bottom:20px;padding-top:4px;border-top:1px solid #e0ece0;">
-          <div style="font-size:17px;font-weight:700;color:#2e7d32;margin:16px 0 6px">♡ 오늘의 느낀 점</div>
-          <div style="font-size:14px;color:#666;margin-bottom:12px">에코리움을 관람하며 보고, 느끼고, 배운 것을 자유롭게 써보세요!</div>
-          <textarea id="ta-reflection" placeholder="오늘 가장 기억에 남는 것은 무엇인가요?" style="min-height:110px" oninput="liveCheckFinish()">${escHtml(reflection)}</textarea>
-        </div>
-        <div id="not-ready-box" class="not-ready" style="display:${ready?'none':'block'}">
-          베스트 질문, 이유, 느낀 점을 모두 작성해주세요!
-        </div>
-        <button class="submit-btn" id="submit-btn" onclick="handleSubmit()" ${ready?'':'disabled'}>
-          🏆 최종 제출하기!
-        </button>
-        <p class="err-msg" id="submit-error" style="display:none"></p>
-      ` : ''}
-    `;
-    return;
-  }
-
-  const h = HALLS[hallIdx];
-  const isFact = type === 'fact';
-
-  const qVal = isFact ? (answers[h.id+'_factQ']||'') : (answers[h.id+'_imaginQ']||'');
-  const aVal = isFact ? (answers[h.id+'_factA']||'') : (answers[h.id+'_imaginA']||'');
-  const filled = qVal.trim() && aVal.trim();
-
-  const example = isFact ? h.factExample : h.imaginExample;
-  const exHtml = example ? `
-    <div class="ex-box" style="background:${isFact?'#fff8e1':'#fce4ec'};border-left:3px solid ${isFact?'#ffd54f':'#f48fb1'}">
-      <div class="ex-label" style="color:${isFact?'#bf8500':'#880e4f'}">예시</div>
-      <div class="ex-q" style="color:${isFact?'#4a3000':'#4a0020'}">Q: ${example.q}</div>
-      <div class="ex-a" style="color:${isFact?'#6d4c00':'#6d0030'}">A: ${example.a}</div>
-    </div>` : '';
-
-  const typeColor = isFact ? '#e65100' : '#6a1b9a';
-  const typeBg    = isFact ? '#fff8e1' : '#f3e5f5';
-  const typeBorder= isFact ? '#ffd54f' : '#ce93d8';
-  const typeIcon  = isFact ? '♧' : '♣';
-  const typeTitle = isFact ? '사실적 질문' : '상상적 질문';
-  const typeDesc  = isFact
-    ? '안내판이나 직접 관찰로 답을 확인할 수 있는 질문을 만들어보세요.'
-    : '"만약 ~라면?", "왜 ~일까?" 처럼 정답이 없는 질문을 만들어보세요.';
-  const qPlaceholder = isFact
-    ? '안내판을 보고 질문을 만들어 보세요.'
-    : '"만약 ~라면?" 또는 "왜 ~일까?" 형태로 써보세요.';
-  const aPlaceholder = isFact
-    ? '안내판이나 전시물에서 답을 찾아 써보세요.'
-    : '정답이 없어요. 내 생각을 자유롭게 써보세요!';
-
-  content.innerHTML = `
-    <div style="display:inline-flex;align-items:center;gap:8px;background:${h.bg};border-radius:24px;padding:8px 18px;margin-bottom:6px">
-      <span style="font-size:22px">${h.emoji}</span>
-      <span style="font-size:17px;font-weight:700;color:${h.color}">${h.name}</span>
-    </div>
-
-    <div style="display:inline-block;background:${typeBg};border:1.5px solid ${typeBorder};border-radius:20px;padding:5px 14px;font-size:13px;font-weight:700;color:${typeColor};margin-bottom:16px">
-      ${typeIcon} ${typeTitle}
-    </div>
-
-    <div style="font-size:15px;color:#555;margin-bottom:20px;line-height:1.6">${typeDesc}</div>
-
-    ${exHtml}
-
-    <div class="input-block">
-      <label class="input-label">Q — 내가 만든 질문</label>
-      <textarea id="ta-q" placeholder="${qPlaceholder}" oninput="liveCheck()">${escHtml(qVal)}</textarea>
-    </div>
-    <div class="input-block">
-      <label class="input-label">A — ${isFact ? '찾은 답' : '내 생각'}</label>
-      <textarea id="ta-a" placeholder="${aPlaceholder}" oninput="liveCheck()">${escHtml(aVal)}</textarea>
-    </div>
-
-    <div id="step-done" class="step-done" style="display:${filled?'block':'none'}">
-      ✅ 완료! 다음 버튼을 눌러 계속하세요.
-    </div>
-  `;
-}
-
-async function handleSubmit() {
-  saveStep();
-  if (!isFinishReady()) return;
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = true; btn.textContent = '제출 중...';
-
-  const payload = {
-    studentId, studentName,
-    grade: parsedId.grade, cls: parsedId.cls,
-    submittedAt: new Date().toLocaleString('ko-KR'),
-    halls: Object.fromEntries(HALLS.map(h => [h.id, {
-      factQ:   answers[h.id+'_factQ']   ||'',
-      factA:   answers[h.id+'_factA']   ||'',
-      imaginQ: answers[h.id+'_imaginQ'] ||'',
-      imaginA: answers[h.id+'_imaginA'] ||'',
-    }])),
-    bestQ, bestReason, reflection,
-  };
-
-  try {
-    await fetch(GOOGLE_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload), mode:'no-cors' });
-    document.getElementById('done-msg').innerHTML =
-      `<b>${studentName}</b> 학생의 미션지가 제출되었습니다.<br>
-       <span style="font-size:13px;color:#888">${parsedId.label} · 학번 ${studentId}</span><br>수고 많았어요! 🎉`;
-    document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
-    document.getElementById('done-screen').classList.add('active');
-    document.getElementById('hall-tab-bar').style.display = 'none';
-    document.getElementById('step-bar').style.display = 'none';
-    document.getElementById('nav-bar').style.display  = 'none';
-  } catch(e) {
-    const errEl = document.getElementById('submit-error');
-    if (errEl) { errEl.textContent='제출 중 오류가 발생했습니다. 선생님께 알려주세요.'; errEl.style.display='block'; }
-    btn.disabled=false; btn.textContent='🏆 최종 제출하기!';
-  }
-}
-
-function escHtml(str) {
-  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-</script>
-</body>
-</html>
+      <span class="done-hall" style="background:#e8f5e9;color:#2e7d32;border:1.5px solid #66bb6a">🌴 열대관 ✓</span>
+      <span class="done-hall" style="background:#fff3e0;color:#e65100;border:1.5px solid #ffa726">🏜️ 사막관 ✓</span>
+      <span class="done-hall" style="background:#e3f2fd;color:#1565c0;border:1.5px solid #42a5f5">🌿 지중해관 ✓</span>
+      <span class="done-hall" style="background:#f1f8e9;color:#558b2f;border:1.5px solid #9ccc65">🍂 온대관 ✓</span>
+      <span class="done-hall" style="background
