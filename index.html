@@ -17,7 +17,7 @@
       background-attachment: fixed;
       color: #1f2937;
       min-height: 100vh;
-      padding-bottom: 100px;
+      padding-bottom: 20px;
     }
 
     /* ── 헤더 ── */
@@ -261,6 +261,10 @@
 <!-- ===== 미션 ===== -->
 <div id="mission-screen" class="screen">
   <div id="step-content" class="content"></div>
+  <div id="nav-bar" style="display:none">
+    <button class="nav-btn nav-prev" id="btn-prev" onclick="goStep(currentStep-1)" disabled>← 이전</button>
+    <button class="nav-btn nav-next" id="btn-next" onclick="goStep(currentStep+1)">다음 →</button>
+  </div>
 </div>
 
 <!-- ===== 완료 ===== -->
@@ -280,11 +284,7 @@
   </div>
 </div>
 
-<!-- 하단 네비 -->
-<div id="nav-bar" style="display:none">
-  <button class="nav-btn nav-prev" id="btn-prev" onclick="goStep(currentStep-1)" disabled>← 이전</button>
-  <button class="nav-btn nav-next" id="btn-next" onclick="goStep(currentStep+1)">다음 →</button>
-</div>
+
 
 <script>
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxaVfiZaVLaIQYgwp3AOG1uimu4hRKemGLNSfN4aMSH6aPXIgpYFEiwX7oRhq26FzWk/exec";
