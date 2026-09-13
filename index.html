@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>질문왕 챌린지 : 에코리움을 정복하라!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans KR', sans-serif; background: #f5f9f5; color: #1a2e1a; min-height: 100vh; padding-bottom: 80px; }
+
+    /* 헤더 */
+    #app-header { background: #2e7d32; color: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+    #app-header .title { font-size: 15px; font-weight: 700; }
+    #app-header .sub { font-size: 10px; opacity: 0.8; margin-top: 1px; }
+    #app-header .user-info { text-align: right; }
+    #app-header .user-grade { display: block; font-size: 11px; opacity: 0.8; }
+    #app-header .user-name { display: block; font-size: 13px; font-weight: 700; }
+
+    /* 진행률 */
+    #progress-bar-wrap { background: #c8e6c9; padding: 7px 16px; display: flex; align-items: center; gap: 10px; }
+    #progress-bar-track { flex: 1; height: 6px; background: #a5d6a7; border-radius: 3px; overflow: hidden; }
+    #progress-bar-fill { height: 100%; background: #2e7d32; border-radius: 3px; transition: width 0.4s; width: 0%; }
+    #progress-text { font-size: 12px; color: #2e7d32; font-weight: 600; white-space: nowrap; }
+
+    /* 팁 배너 */
+    #tip-banner { background: #fffde7; border-bottom: 1px solid #fff176; padding: 8px 14px 8px 16px; display: flex; align-items: flex-start; gap: 8px; }
+    #tip-banner .tip-row { display: block; font-size: 12px; color: #5d4037; line-height: 1.7; }
+    #tip-banner .tip-close { background: none; border: none; color: #aaa; font-size: 14px; cursor: pointer; padding: 0; flex-shrink: 0; margin-top: 2px; }
+
+    /* 탭 */
+    #tab-bar { display: flex; overflow-x: auto; background: #fff; border-bottom: 1.5px solid #e0ece0; scrollbar-width: none; padding: 0 4px; }
+    #tab-bar::-webkit-scrollbar { display: none; }
+    .tab-btn { flex-shrink: 0; padding: 9px 12px; font-size: 12px; border: none; border-bottom: 2.5px solid transparent; background: none; cursor: pointer; white-space: nowrap; transition: all 0.15s; color: #888; font-family: inherit; font-weight: 400; }
+    .tab-btn.active { font-weight: 700; }
+    .tab-check { font-size: 10px; color: #2e7d32; }
+
+    /* 콘텐츠 공통 */
+    .content { max-width: 680px; margin: 0 auto; padding: 14px 14px 0; }
+    .hall-header { border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+    .hall-emoji { font-size: 28px; }
+    .hall-name { font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+    .hall-sub { font-size: 12px; color: #777; }
+    .q-section { background: #fff; border-radius: 10px; padding: 14px; margin-bottom: 12px; border: 1px solid #e5ede5; }
+    .q-type-tag { font-size: 12px; font-weight: 600; border-radius: 6px; padding: 6px 10px; margin-bottom: 10px; line-height: 1.5; }
+    .ex-box { background: #fff8e1; border-radius: 7px; padding: 9px 12px; margin-bottom: 10px; border-left: 3px solid #ffd54f; }
+    .ex-label { font-size: 10px; font-weight: 700; color: #bf8500; margin-bottom: 4px; text-transform: uppercase; }
+    .ex-q { font-size: 12px; color: #4a3000; margin-bottom: 2px; line-height: 1.5; }
+    .ex-a { font-size: 12px; color: #6d4c00; line-height: 1.5; }
+    .input-pair { display: flex; gap: 10px; }
+    .input-block { flex: 1; }
+    .input-label { display: block; font-size: 11px; font-weight: 700; color: #555; margin-bottom: 5px; }
+    textarea { width: 100%; min-height: 64px; padding: 9px 11px; border-radius: 8px; border: 1.5px solid #c8e6c9; font-size: 13px; line-height: 1.6; resize: vertical; background: #f9fff9; outline: none; font-family: inherit; transition: border-color 0.15s; }
+    textarea:focus { border-color: #2e7d32; }
+    .complete-badge { background: #e8f5e9; color: #2e7d32; border-radius: 8px; padding: 10px 14px; text-align: center; font-weight: 700; font-size: 13px; margin-top: 4px; }
+    .not-ready-box { background: #fff3e0; color: #bf6000; border-radius: 8px; padding: 10px 14px; font-size: 12px; margin-bottom: 12px; text-align: center; }
+    .submit-btn { width: 100%; padding: 15px; background: #7b1fa2; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; margin-top: 4px; cursor: pointer; font-family: inherit; transition: opacity 0.2s; }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* 하단 네비 */
+    #nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #e0ece0; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 10; }
+    .nav-btn { padding: 9px 18px; border-radius: 8px; border: 1.5px solid #c8e6c9; background: #fff; color: #2e7d32; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    #nav-dots { flex: 1; text-align: center; }
+    .nav-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin: 0 3px; background: #ddd; transition: background 0.2s; }
+
+    /* 로그인 화면 */
+    #login-screen { display: block; }
+    .login-header { background: #2e7d32; padding: 40px 20px 30px; text-align: center; }
+    .login-emoji { font-size: 48px; margin-bottom: 10px; }
+    .login-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .login-subtitle { font-size: 14px; color: rgba(255,255,255,0.85); }
+    .login-card { max-width: 380px; margin: 0 auto; padding: 24px 20px; }
+    .tip-box { background: #fffde7; border-radius: 10px; padding: 12px 14px; margin-bottom: 20px; border: 1px solid #fff176; }
+    .tip-line { font-size: 12px; color: #5d4037; line-height: 1.7; margin-bottom: 4px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px; }
+    .field input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1.5px solid #c8e6c9; font-size: 15px; background: #f9fff9; outline: none; font-family: inherit; }
+    .field input:focus { border-color: #2e7d32; }
+    .id-hint { font-size: 12px; margin-top: 5px; font-weight: 600; }
+    .login-btn { width: 100%; padding: 14px; background: #2e7d32; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 6px; font-family: inherit; }
+    .err-msg { color: #c00; font-size: 13px; text-align: center; margin-top: 8px; }
+
+    /* 완료 화면 */
+    #done-screen { display: none; }
+    .done-wrap { max-width: 380px; margin: 50px auto; background: #fff; border-radius: 16px; padding: 36px 24px; text-align: center; box-shadow: 0 4px 20px rgba(46,125,50,0.12); }
+    .done-badge { font-size: 56px; margin-bottom: 12px; }
+    .done-title { font-size: 22px; font-weight: 700; color: #2e7d32; margin-bottom: 8px; }
+    .done-sub { font-size: 14px; color: #555; line-height: 1.7; margin-bottom: 20px; }
+    .hall-badge-row { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 8px; }
+    .hall-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+
+    /* 미션 화면 */
+    #mission-screen { display: none; }
+
+    /* 화면 전환 */
+    .screen { display: none; }
+    .screen.active { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- 공통 헤더 (로그인 제외) -->
+<header id="app-header" style="display:none">
+  <div>
+    <div class="title">질문왕 챌린지 🌿</div>
+    <div class="sub">에코리움을 정복하라!</div>
+  </div>
+  <div class="user-info">
+    <span class="user-grade" id="header-grade"></span>
+    <span class="user-name" id="header-name"></span>
+  </div>
+</header>
+
+<!-- 진행률 (미션 화면만) -->
+<div id="progress-bar-wrap" style="display:none">
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+  <span id="progress-text">0/5 관 완료</span>
+</div>
+
+<!-- 팁 배너 -->
+<div id="tip-banner" style="display:none">
+  <div style="flex:1">
+    <span class="tip-row"><b>♧ 사실적 질문</b> — 안내판·관찰로 답을 바로 확인할 수 있는 질문</span>
+    <span class="tip-row" style="color:#5a3a8a"><b>♣ 상상적 질문</b> — "만약 ~라면", "왜 ~일까?" 자유 사고 질문</span>
+  </div>
+  <button class="tip-close" onclick="document.getElementById('tip-banner').style.display='none'">✕</button>
+</div>
+
+<!-- 탭 바 -->
+<div id="tab-bar" style="display:none">
+  <button class="tab-btn active" data-idx="0" style="color:#2e7d32; border-bottom-color:#2e7d32" onclick="goTab(0)">🌴 열대관</button>
+  <button class="tab-btn" data-idx="1" onclick="goTab(1)">🏜️ 사막관</button>
+  <button class="tab-btn" data-idx="2" onclick="goTab(2)">🌿 지중해관</button>
+  <button class="tab-btn" data-idx="3" onclick="goTab(3)">🍂 온대관</button>
+  <button class="tab-btn" data-idx="4" onclick="goTab(4)">🧊 극지관</button>
+  <button class="tab-btn" data-idx="5" onclick="goTab(5)" style="font-size:11px">☞ 마무리</button>
+</div>
+
+<!-- ===== 로그인 화면 ===== -->
+<div id="login-screen" class="screen active">
+  <div class="login-header">
+    <div class="login-emoji">🌿</div>
+    <h1 class="login-title">질문왕 챌린지</h1>
+    <p class="login-subtitle">에코리움을 정복하라!</p>
+  </div>
+  <div class="login-card">
+    <div class="tip-box">
+      <p class="tip-line">♧ <b>사실적 질문</b>이란? 안내판이나 직접 관찰로 답을 바로 확인할 수 있는 질문!</p>
+      <p class="tip-line" style="margin-bottom:0">♣ <b>상상적 질문</b>이란? "만약 ~라면", "왜 ~일까?"처럼 정답이 없고 내 생각을 펼치는 질문!</p>
+    </div>
+    <div class="field">
+      <label>학번</label>
+      <input type="text" id="input-id" placeholder="예) 2211  (학년·반·번호 4자리)" maxlength="4"
+        oninput="onStudentIdInput()" onkeydown="if(event.key==='Enter') handleLogin()">
+      <p class="id-hint" id="id-hint" style="color:#aaa"></p>
+    </div>
+    <div class="field">
+      <label>이름</label>
+      <input type="text" id="input-name" placeholder="예) 홍길동"
+        onkeydown="if(event.key==='Enter') handleLogin()">
+    </div>
+    <p class="err-msg" id="login-error" style="display:none"></p>
+    <button class="login-btn" onclick="handleLogin()">미션 시작하기 🌿</button>
+  </div>
+</div>
+
+<!-- ===== 미션 화면 ===== -->
+<div id="mission-screen" class="screen">
+  <div id="hall-content" class="content"></div>
+</div>
+
+<!-- ===== 완료 화면 ===== -->
+<div id="done-screen" class="screen">
+  <div class="done-wrap">
+    <div class="done-badge">🏆</div>
+    <h2 class="done-title">질문왕 달성!</h2>
+    <p class="done-sub" id="done-msg"></p>
+    <div class="hall-badge-row">
+      <span class="hall-badge" style="background:#e8f5e9;color:#2e7d32;border:1px solid #66bb6a">🌴 열대관 ✓</span>
+      <span class="hall-badge" style="background:#fff3e0;color:#e65100;border:1px solid #ffa726">🏜️ 사막관 ✓</span>
+      <span class="hall-badge" style="background:#e3f2fd;color:#1565c0;border:1px solid #42a5f5">🌿 지중해관 ✓</span>
+      <span class="hall-badge" style="background:#f1f8e9;color:#558b2f;border:1px solid #9ccc65">🍂 온대관 ✓</span>
+      <span class="hall-badge" style="background:#e1f5fe;color:#0277bd;border:1px solid #4fc3f7">🧊 극지관 ✓</span>
+    </div>
+    <p style="font-size:12px;color:#aaa;margin-top:12px">선생님이 구글 시트에서 확인하실 수 있습니다</p>
+  </div>
+</div>
+
+<!-- 하단 네비게이션 -->
+<div id="nav-bar" style="display:none">
+  <button class="nav-btn" id="btn-prev" onclick="goTab(currentTab-1)" disabled>← 이전</button>
+  <span id="nav-dots"></span>
+  <button class="nav-btn" id="btn-next" onclick="goTab(currentTab+1)">다음 →</button>
+</div>
+
+<script>
+// ───────────────────────────────────────────────
+// 설정: 구글 Apps Script 배포 URL을 여기에 붙여넣으세요
+const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+// ───────────────────────────────────────────────
+
+const HALLS = [
+  {
+    id: "tropical", name: "열대관", emoji: "🌴",
+    color: "#2e7d32", bg: "#e8f5e9",
+    factExample: { q: "열대관에서 만날 수 있는 '세계 최대 담수어'의 이름은 무엇인가?", a: "피라루쿠" },
+    imaginExample: { q: "만약 열대우림이 사라지면 어떤 문제가 생길까?", a: "지구 온난화 문제가 가속화될 것이다." },
+  },
+  { id: "desert",        name: "사막관",   emoji: "🏜️", color: "#e65100", bg: "#fff3e0", factExample: null, imaginExample: null },
+  { id: "mediterranean", name: "지중해관", emoji: "🌿", color: "#1565c0", bg: "#e3f2fd", factExample: null, imaginExample: null },
+  { id: "temperate",     name: "온대관",   emoji: "🍂", color: "#558b2f", bg: "#f1f8e9", factExample: null, imaginExample: null },
+  { id: "polar",         name: "극지관",   emoji: "🧊", color: "#0277bd", bg: "#e1f5fe", factExample: null, imaginExample: null },
+];
+
+const TAB_COLORS = ["#2e7d32","#e65100","#1565c0","#558b2f","#0277bd","#7b1fa2"];
+
+let studentId   = "";
+let studentName = "";
+let parsedId    = null;
+let currentTab  = 0;
+let answers     = {};   // key: hallId_field
+let bestQ = "", bestReason = "", reflection = "";
+
+// ── 학번 파싱 ──
+function parseStudentId(id) {
+  const s = id.trim();
+  if (!/^\d{4}$/.test(s)) return null;
+  return { grade: s[0], cls: s[1], num: s.slice(2), label: `${s[0]}학년 ${s[1]}반 ${s.slice(2)}번` };
+}
+
+function onStudentIdInput() {
+  const val = document.getElementById('input-id').value;
+  const hint = document.getElementById('id-hint');
+  const p = parseStudentId(val);
+  if (!val) { hint.textContent = ''; hint.style.color = '#aaa'; return; }
+  if (!p)   { hint.textContent = '숫자 4자리로 입력해주세요'; hint.style.color = '#c00'; return; }
+  hint.textContent = `✓ ${p.label}`;
+  hint.style.color = '#2e7d32';
+}
+
+// ── 로그인 ──
+function handleLogin() {
+  const idVal   = document.getElementById('input-id').value.trim();
+  const nameVal = document.getElementById('input-name').value.trim();
+  const errEl   = document.getElementById('login-error');
+
+  function showErr(msg) { errEl.textContent = msg; errEl.style.display = 'block'; }
+
+  if (!idVal)   { showErr('학번을 입력해주세요.'); return; }
+  const p = parseStudentId(idVal);
+  if (!p)       { showErr('학번은 숫자 4자리로 입력해주세요. (예: 2211)'); return; }
+  if (!nameVal) { showErr('이름을 입력해주세요.'); return; }
+
+  errEl.style.display = 'none';
+  studentId   = idVal;
+  studentName = nameVal;
+  parsedId    = p;
+
+  // 헤더 업데이트
+  document.getElementById('header-grade').textContent = `${p.grade}학년 ${p.cls}반`;
+  document.getElementById('header-name').textContent  = studentName;
+
+  // 화면 전환
+  showScreen('mission');
+}
+
+// ── 화면 전환 ──
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById(name + '-screen').classList.add('active');
+
+  const isLogin  = name === 'login';
+  const isMission = name === 'mission';
+  const isDone   = name === 'done';
+
+  document.getElementById('app-header').style.display      = isLogin ? 'none' : 'flex';
+  document.getElementById('progress-bar-wrap').style.display = isMission ? 'flex' : 'none';
+  document.getElementById('tip-banner').style.display       = isMission ? 'flex' : 'none';
+  document.getElementById('tab-bar').style.display          = isMission ? 'flex' : 'none';
+  document.getElementById('nav-bar').style.display          = isMission ? 'flex' : 'none';
+
+  if (isMission) {
+    renderTab(0);
+  }
+}
+
+// ── 탭 이동 ──
+function goTab(idx) {
+  if (idx < 0 || idx > 5) return;
+  // 현재 탭 값 저장
+  saveCurrentTab();
+  currentTab = idx;
+  renderTab(idx);
+}
+
+function saveCurrentTab() {
+  if (currentTab < 5) {
+    const h = HALLS[currentTab];
+    answers[h.id + '_factQ']   = document.getElementById('ta-factQ')?.value   || answers[h.id + '_factQ']   || '';
+    answers[h.id + '_factA']   = document.getElementById('ta-factA')?.value   || answers[h.id + '_factA']   || '';
+    answers[h.id + '_imaginQ'] = document.getElementById('ta-imaginQ')?.value || answers[h.id + '_imaginQ'] || '';
+    answers[h.id + '_imaginA'] = document.getElementById('ta-imaginA')?.value || answers[h.id + '_imaginA'] || '';
+  } else {
+    bestQ        = document.getElementById('ta-bestQ')?.value      || bestQ;
+    bestReason   = document.getElementById('ta-bestReason')?.value || bestReason;
+    reflection   = document.getElementById('ta-reflection')?.value || reflection;
+  }
+}
+
+// ── 관 완료 체크 ──
+function isHallFilled(hallId) {
+  return ['factQ','factA','imaginQ','imaginA'].every(f => (answers[hallId+'_'+f]||'').trim());
+}
+function filledCount() {
+  return HALLS.filter(h => isHallFilled(h.id)).length;
+}
+function isFinishReady() {
+  return filledCount() === 5 && bestQ.trim() && bestReason.trim() && reflection.trim();
+}
+
+// ── 진행률 업데이트 ──
+function updateProgress() {
+  const cnt = filledCount();
+  const pct = (cnt / 5) * 100;
+  document.getElementById('progress-bar-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${cnt}/5 관 완료`;
+}
+
+// ── 탭 버튼 스타일 업데이트 ──
+function updateTabs() {
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    const active = i === currentTab;
+    const color  = TAB_COLORS[i];
+    btn.style.color       = active ? color : '#888';
+    btn.style.borderBottomColor = active ? color : 'transparent';
+    btn.style.fontWeight  = active ? '700' : '400';
+
+    // 완료 체크 표시
+    const checkId = 'tab-check-' + i;
+    let check = btn.querySelector('.tab-check');
+    if (!check) { check = document.createElement('span'); check.className = 'tab-check'; btn.appendChild(check); }
+    const filled = i < 5 ? isHallFilled(HALLS[i].id) : (bestQ.trim() && bestReason.trim() && reflection.trim());
+    check.textContent = filled ? ' ✓' : '';
+  });
+
+  // 네비 버튼
+  document.getElementById('btn-prev').disabled = currentTab === 0;
+  document.getElementById('btn-next').disabled = currentTab === 5;
+
+  // 네비 닷
+  let dots = '';
+  for (let i = 0; i <= 5; i++) {
+    const color = i === currentTab ? TAB_COLORS[i] : '#ddd';
+    dots += `<span class="nav-dot" style="background:${color}"></span>`;
+  }
+  document.getElementById('nav-dots').innerHTML = dots;
+}
+
+// ── 탭 렌더링 ──
+function renderTab(idx) {
+  const content = document.getElementById('hall-content');
+
+  if (idx < 5) {
+    const h = HALLS[idx];
+    const fq = answers[h.id+'_factQ']   || '';
+    const fa = answers[h.id+'_factA']   || '';
+    const iq = answers[h.id+'_imaginQ'] || '';
+    const ia = answers[h.id+'_imaginA'] || '';
+    const filled = isHallFilled(h.id);
+
+    const factEx = h.factExample ? `
+      <div class="ex-box">
+        <p class="ex-label">예시</p>
+        <p class="ex-q">Q: ${h.factExample.q}</p>
+        <p class="ex-a">A: ${h.factExample.a}</p>
+      </div>` : '';
+
+    const imaginEx = h.imaginExample ? `
+      <div class="ex-box" style="background:#fce4ec">
+        <p class="ex-label">예시</p>
+        <p class="ex-q">Q: ${h.imaginExample.q}</p>
+        <p class="ex-a">A: ${h.imaginExample.a}</p>
+      </div>` : '';
+
+    content.innerHTML = `
+      <div class="hall-header" style="background:${h.bg};border-left:4px solid ${h.color}">
+        <span class="hall-emoji">${h.emoji}</span>
+        <div>
+          <div class="hall-name" style="color:${h.color}">${h.name}</div>
+          <div class="hall-sub">질문을 만들고 답을 찾아보세요!</div>
+        </div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-type-tag" style="background:#fff8e1;color:#e65100;border:1px solid #ffcc02">
+          ♧ 사실적 질문 — 안내판이나 관찰로 답을 확인할 수 있는 질문
+        </div>
+        ${factEx}
+        <div class="input-pair">
+          <div class="input-block">
+            <label class="input-label">Q (내가 만든 질문)</label>
+            <textarea id="ta-factQ" placeholder="안내판을 보고 질문을 만들어 보세요." oninput="liveCheck()">${escHtml(fq)}</textarea>
+          </div>
+          <div class="input-block">
+            <label class="input-label">A (찾은 답)</label>
+            <textarea id="ta-factA" placeholder="안내판이나 전시물에서 답을 찾아 써보세요." oninput="liveCheck()">${escHtml(fa)}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-type-tag" style="background:#f3e5f5;color:#6a1b9a;border:1px solid #ce93d8">
+          ♣ 상상적 질문 — "만약 ~라면", "왜 ~일까?" 정답이 없는 자유 사고 질문
+        </div>
+        ${imaginEx}
+        <div class="input-block" style="margin-bottom:8px">
+          <label class="input-label">Q (내가 만든 질문)</label>
+          <textarea id="ta-imaginQ" placeholder='"만약 ~라면?" 또는 "왜 ~일까?" 형태로 질문을 만들어 보세요.' oninput="liveCheck()">${escHtml(iq)}</textarea>
+        </div>
+        <div class="input-block">
+          <label class="input-label">A (내 생각)</label>
+          <textarea id="ta-imaginA" placeholder="정답이 없어요. 내 생각을 자유롭게 써보세요!" style="min-height:70px" oninput="liveCheck()">${escHtml(ia)}</textarea>
+        </div>
+      </div>
+
+      <div id="complete-badge" style="display:${filled?'block':'none'}" class="complete-badge">
+        ✅ 이 관 완료! 다음 관으로 이동하세요.
+      </div>
+    `;
+
+  } else {
+    // 마무리 탭
+    const cnt = filledCount();
+    const ready = isFinishReady();
+    content.innerHTML = `
+      <div class="hall-header" style="background:#f3e5f5;border-left:4px solid #7b1fa2">
+        <span class="hall-emoji">🏆</span>
+        <div>
+          <div class="hall-name" style="color:#7b1fa2">마무리 미션</div>
+          <div class="hall-sub">오늘의 질문왕을 완성해봐요!</div>
+        </div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-type-tag" style="background:#f3e5f5;color:#6a1b9a;border:1px solid #ce93d8">
+          ☞ 오늘 만든 질문 중 가장 마음에 드는 질문 1개를 적고 그 이유도 써보세요
+        </div>
+        <div class="input-block" style="margin-bottom:8px">
+          <label class="input-label">🥇 베스트 질문</label>
+          <textarea id="ta-bestQ" placeholder="5개 관에서 만든 질문 중 가장 마음에 드는 것을 적어보세요." oninput="liveCheck()">${escHtml(bestQ)}</textarea>
+        </div>
+        <div class="input-block">
+          <label class="input-label">이 질문을 고른 이유</label>
+          <textarea id="ta-bestReason" placeholder="왜 이 질문이 가장 좋았나요?" style="min-height:70px" oninput="liveCheck()">${escHtml(bestReason)}</textarea>
+        </div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-type-tag" style="background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7">
+          ♡ 오늘 국립생태원 에코리움을 관람하여 느낀 점을 자유롭게 적어보세요
+        </div>
+        <div class="input-block">
+          <label class="input-label">오늘의 느낀 점</label>
+          <textarea id="ta-reflection" placeholder="에코리움에서 보고, 느끼고, 배운 것들을 자유롭게 써보세요!" style="min-height:90px" oninput="liveCheck()">${escHtml(reflection)}</textarea>
+        </div>
+      </div>
+
+      <div id="not-ready-box" class="not-ready-box" style="display:${ready?'none':'block'}">
+        ${cnt < 5 ? `아직 ${5-cnt}개 관이 남았어요. 먼저 모든 관을 완성해주세요.` : '베스트 질문, 이유, 느낀 점을 모두 작성하면 제출할 수 있어요!'}
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="handleSubmit()" ${ready?'':'disabled'}>
+        ${ready ? '🏆 최종 제출하기!' : `완료 ${cnt}/5관`}
+      </button>
+      <p class="err-msg" id="submit-error" style="display:none"></p>
+    `;
+  }
+
+  updateProgress();
+  updateTabs();
+}
+
+// ── 실시간 체크 (textarea 입력 시) ──
+function liveCheck() {
+  if (currentTab < 5) {
+    const h = HALLS[currentTab];
+    const fq = document.getElementById('ta-factQ')?.value   || '';
+    const fa = document.getElementById('ta-factA')?.value   || '';
+    const iq = document.getElementById('ta-imaginQ')?.value || '';
+    const ia = document.getElementById('ta-imaginA')?.value || '';
+    answers[h.id+'_factQ']   = fq;
+    answers[h.id+'_factA']   = fa;
+    answers[h.id+'_imaginQ'] = iq;
+    answers[h.id+'_imaginA'] = ia;
+    const filled = [fq,fa,iq,ia].every(v => v.trim());
+    const badge = document.getElementById('complete-badge');
+    if (badge) badge.style.display = filled ? 'block' : 'none';
+  } else {
+    bestQ      = document.getElementById('ta-bestQ')?.value      || '';
+    bestReason = document.getElementById('ta-bestReason')?.value || '';
+    reflection = document.getElementById('ta-reflection')?.value || '';
+    const ready = isFinishReady();
+    const btn   = document.getElementById('submit-btn');
+    const box   = document.getElementById('not-ready-box');
+    if (btn) {
+      btn.disabled = !ready;
+      const cnt = filledCount();
+      btn.textContent = ready ? '🏆 최종 제출하기!' : `완료 ${cnt}/5관`;
+    }
+    if (box) {
+      box.style.display = ready ? 'none' : 'block';
+      const cnt = filledCount();
+      box.textContent = cnt < 5
+        ? `아직 ${5-cnt}개 관이 남았어요. 먼저 모든 관을 완성해주세요.`
+        : '베스트 질문, 이유, 느낀 점을 모두 작성하면 제출할 수 있어요!';
+    }
+  }
+  updateProgress();
+  updateTabs();
+}
+
+// ── 최종 제출 ──
+async function handleSubmit() {
+  saveCurrentTab();
+  if (!isFinishReady()) return;
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = '제출 중...';
+
+  const payload = {
+    studentId,
+    studentName,
+    grade: parsedId.grade,
+    cls:   parsedId.cls,
+    submittedAt: new Date().toLocaleString('ko-KR'),
+    halls: Object.fromEntries(HALLS.map(h => [h.id, {
+      factQ:   answers[h.id+'_factQ']   || '',
+      factA:   answers[h.id+'_factA']   || '',
+      imaginQ: answers[h.id+'_imaginQ'] || '',
+      imaginA: answers[h.id+'_imaginA'] || '',
+    }])),
+    bestQ, bestReason, reflection,
+  };
+
+  try {
+    if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+      await new Promise(r => setTimeout(r, 1200));
+    } else {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        mode: 'no-cors',
+      });
+    }
+    // 완료 화면
+    document.getElementById('done-msg').innerHTML =
+      `<b>${studentName}</b> 학생의 미션지가 제출되었습니다.<br>
+       <span style="font-size:13px;color:#888">${parsedId.label} · 학번 ${studentId}</span><br>
+       수고 많았어요! 🎉`;
+    showScreen('done');
+  } catch(e) {
+    const errEl = document.getElementById('submit-error');
+    if (errEl) { errEl.textContent = '제출 중 오류가 발생했습니다. 선생님께 알려주세요.'; errEl.style.display = 'block'; }
+    btn.disabled = false;
+    btn.textContent = '🏆 최종 제출하기!';
+  }
+}
+
+// ── HTML 이스케이프 ──
+function escHtml(str) {
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
